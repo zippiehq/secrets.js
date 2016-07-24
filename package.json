@@ -44,5 +44,6 @@
   "bugs": {
     "url": "https://github.com/grempe/secrets.js/issues"
   },
-  "homepage": "https://github.com/grempe/secrets.js"
+  "homepage": "https://github.com/grempe/secrets.js",
+  "typings": "./secrets.js.d.ts"
 }
