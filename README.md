@@ -11,7 +11,7 @@
 - [Changelog](#changelog)
 - [Possible future enhancements](#possible-future-enhancements)
 
-## What is it?
+## About
 
 secrets.js is an implementation of [Shamir's threshold secret sharing scheme](http://en.wikipedia.org/wiki/Shamir's_Secret_Sharing) in JavaScript, for Node.js and browsers with both Global variable and AMD module loading support.
 
@@ -29,7 +29,7 @@ The audit was performed on released code on the master branch no later than comm
 
 Quoting from the Cure53 audit report:
 
-```
+```text
 Conclusion
 
 ...
@@ -45,81 +45,87 @@ about distribution of Shamir’s Secret Sharing.
 
 ```
 
-## Examples:
+## Examples
 
 Divide a 512-bit key, expressed in hexadecimal form, into 10 shares, requiring that any 5 of them are necessary to reconstruct the original key:
 
-    // generate a 512-bit key
-    var key = secrets.random(512); // => key is a hex string
+```javascript
+// generate a 512-bit key
+var key = secrets.random(512) // => key is a hex string
 
-    // split into 10 shares with a threshold of 5
-    var shares = secrets.share(key, 10, 5);
-    // => shares = ['801xxx...xxx','802xxx...xxx','803xxx...xxx','804xxx...xxx','805xxx...xxx']
+// split into 10 shares with a threshold of 5
+var shares = secrets.share(key, 10, 5)
+// => shares = ['801xxx...xxx','802xxx...xxx','803xxx...xxx','804xxx...xxx','805xxx...xxx']
 
-    // combine 4 shares
-    var comb = secrets.combine( shares.slice(0,4) );
-    console.log(comb === key); // => false
+// combine 4 shares
+var comb = secrets.combine(shares.slice(0, 4))
+console.log(comb === key) // => false
 
-    // combine 5 shares
-    comb = secrets.combine( shares.slice(4,9) );
-    console.log(comb === key); // => true
+// combine 5 shares
+comb = secrets.combine(shares.slice(4, 9))
+console.log(comb === key) // => true
 
-    // combine ALL shares
-    comb = secrets.combine( shares );
-    console.log(comb === key); // => true
+// combine ALL shares
+comb = secrets.combine(shares)
+console.log(comb === key) // => true
 
-    // create another share with id 8
-    var newShare = secrets.newShare(8, shares); // => newShare = '808xxx...xxx'
+// create another share with id 8
+var newShare = secrets.newShare(8, shares) // => newShare = '808xxx...xxx'
 
-    // reconstruct using 4 original shares and the new share:
-    comb = secrets.combine( shares.slice(1,5).concat(newShare) );
-    console.log(comb === key); // => true
+// reconstruct using 4 original shares and the new share:
+comb = secrets.combine(shares.slice(1, 5).concat(newShare))
+console.log(comb === key) // => true
+```
 
 Divide a password containing a mix of numbers, letters, and other characters, requiring that any 3 shares must be present to reconstruct the original password:
 
-    var pw = '<<PassWord123>>';
+```javascript
+var pw = "<<PassWord123>>"
 
-    // convert the text into a hex string
-    var pwHex = secrets.str2hex(pw); // => hex string
+// convert the text into a hex string
+var pwHex = secrets.str2hex(pw) // => hex string
 
-    // split into 5 shares, with a threshold of 3
-    var shares = secrets.share(pwHex, 5, 3);
+// split into 5 shares, with a threshold of 3
+var shares = secrets.share(pwHex, 5, 3)
 
-    // combine 2 shares:
-    var comb = secrets.combine( shares.slice(1,3) );
+// combine 2 shares:
+var comb = secrets.combine(shares.slice(1, 3))
 
-    //convert back to UTF string:
-    comb = secrets.hex2str(comb);
-    console.log( comb === pw  ); // => false
+//convert back to UTF string:
+comb = secrets.hex2str(comb)
+console.log(comb === pw) // => false
 
-    // combine 3 shares:
-    comb = secrets.combine( [ shares[1], shares[3], shares[4] ] );
+// combine 3 shares:
+comb = secrets.combine([shares[1], shares[3], shares[4]])
 
-    //convert back to UTF string:
-    comb = secrets.hex2str(comb);
-    console.log( comb === pw  ); // => true
+//convert back to UTF string:
+comb = secrets.hex2str(comb)
+console.log(comb === pw) // => true
+```
 
 There are some additional examples of simple usage in the browser, Node.js, and AMD loading (require.js) in the `examples` folder.
 
 ## Installation and usage
 
-This fork of secrets.js is available from [bower.io](http://bower.io/search/?q=secrets.js-grempe) and [www.npmjs.com](https://www.npmjs.com/package/secrets.js-grempe). Install using
+This fork of secrets.js is available from [www.npmjs.com](https://www.npmjs.com/package/secrets.js-grempe). Install using
 
-    npm install secrets.js-grempe
-
-or
-
-    bower install secrets.js-grempe
+```bash
+npm install secrets.js-grempe
+```
 
 The source code for this package is available on [Github](https://github.com/grempe/secrets.js).
 
 To use it in a Node.js application (Requires OpenSSL support compiled into Node):
 
-    var secrets = require('secrets.js');
+```javascript
+var secrets = require("secrets.js")
+```
 
 To use it in the browser with the global 'secrets' defined, include _secrets.js_ or _secrets.min.js_ in your HTML.
 
-    <script src="secrets.min.js"></script>
+```html
+<script src="secrets.min.js"></script>
+```
 
 You can also use it in the browser with an AMD module loading tool like [require.js](http://www.requirejs.org/). See the AMD loading example in the `examples` dir.
 
@@ -137,7 +143,7 @@ You can also use it in the browser with an AMD module loading tool like [require
 - secrets.str2hex()
 - secrets.hex2str()
 
-#### secrets.share( secret, numShares, threshold, [padLength] )
+### secrets.share( secret, numShares, threshold, [padLength] )
 
 Divide a `secret` expressed in hexadecimal form into `numShares` number of shares, requiring that `threshold` number of shares be present for reconstructing the `secret`;
 
@@ -148,7 +154,7 @@ Divide a `secret` expressed in hexadecimal form into `numShares` number of share
 
 The output of `secrets.share()` is an Array of length `numShares`. Each item in the array is a String. See `Share format` below for information on the format.
 
-#### secrets.combine( shares )
+### secrets.combine( shares )
 
 Reconstructs a secret from `shares`.
 
@@ -158,7 +164,7 @@ The output of `secrets.combine()` is a String representing the reconstructed sec
 
 Note that using _more_ than the `threshold` number of shares will also result in an accurate reconstruction of the secret. However, using more shares adds to computation time.
 
-#### secrets.newShare( id, shares )
+### secrets.newShare( id, shares )
 
 Create a new share from the input shares.
 
@@ -167,7 +173,7 @@ Create a new share from the input shares.
 
 The output of `secrets.newShare()` is a String. This is the same format for the share that `secrets.share()` outputs. Note that this function ALWAYS produces an output String. However, as for `secrets.combine()`, if the number of `shares` that are entered is not the `threshold` number of shares, the output share _will not_ be a valid share (i.e. _will not_ be useful in reconstructing the original secret). In order to guarantee that the share is valid, the correct `threshold` number of shares must be provided.
 
-#### secrets.init( [bits, rngType] )
+### secrets.init( [bits, rngType] )
 
 Set the number of bits to use for finite field arithmetic.
 
@@ -187,7 +193,7 @@ Note:
 - The Galois Field may be re-initialized to a new setting when `secrets.newShare()` or `secrets.combine()` are called with shares that are from a different Galois Field than the currently initialized one. For this reason, use `secrets.getConfig()` to check what the current `bits` setting is.
 - Calling `secrets.init()` will also attempt to seed the SJCL RNG if appropriate.
 
-#### secrets.getConfig()
+### secrets.getConfig()
 
 Returns an Object with the current configuration. Has the following properties:
 
@@ -197,7 +203,7 @@ Returns an Object with the current configuration. Has the following properties:
 - `hasCSPRNG`: [Boolean] Indicates whether or not a Cryptographically Secure Pseudo Random Number Generator has been found and initialized.
 - - `typeCSPRNG`: [String] Indicates which random number generator function has been selected based on either environment feature detection (the default) or by manually specifying the RNG type using `secrets.init()` or `secrets.setRNG()`. The current possible types that can be displayed here are ["nodeCryptoRandomBytes", "browserCryptoGetRandomValues", "browserSJCLRandom"].
 
-#### secrets.extractShareComponents( share )
+### secrets.extractShareComponents( share )
 
 Returns an Object with the extracted parts of a public share string passed as an argument. Has the following properties:
 
@@ -205,7 +211,7 @@ Returns an Object with the extracted parts of a public share string passed as an
 - `id`: [Number] The ID number associated with the share when created.
 - `data`: [String] A hex string of the actual share data.
 
-#### secrets.setRNG( function(bits){} | rngType )
+### secrets.setRNG( function(bits){} | rngType )
 
 Set the pseudo-random number generator used to compute shares.
 
@@ -215,7 +221,7 @@ To supply your own PRNG, use `secrets.setRNG()`. It expects a Function of the fo
 
 - `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues", "browserSJCLRandom"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. This is probably most useful for testing or for choosing the `browserSJCLRandom` generator which is a good fallback for browsers that don't support crypto.getRandomValues(). Warning: You can specify a RNG that won't actually _work_ in your environment.
 
-#### secrets.seedRNG ([data, estimatedEntropy, source])
+### secrets.seedRNG ([data, estimatedEntropy, source])
 
 If the SJCL crypto library is loaded in the current environment and enabled with `secrets.init()` or `secrets.setRNG()` then calling this function will attempt to immediately seed the SJCL RNG with entropy. If no arguments are provided the function will attempt to get secure entropy from `crypto.getRandomValues()` in a Browser, or `crypto.randomBytes()` in a Node.js environment.
 
@@ -225,18 +231,18 @@ You can also call this function with arguments that provide and describe an exte
 - `estimatedEntropy`: Integer: optional: An Integer that represents a conservative estimate of how many bits of entropy the data you are providing provides to the RNG.
 - `source`: String, optional: A string that describes the source of the entropy.
 
-#### secrets.random( bits )
+### secrets.random( bits )
 
 Generate a random `bits` length string, and output it in hexadecimal format. `bits` must be an integer greater than 1.
 
-#### secrets.str2hex( str, [bytesPerChar] )
+### secrets.str2hex( str, [bytesPerChar] )
 
 Convert a UTF string `str` into a hexadecimal string, using `bytesPerChar` bytes (octets) for each character.
 
 - `str`: String, required: A UTF string.
 - `bytesPerChar`: Number, optional, default `2`. The maximum `bytesPerChar` is 6 to ensure that each character is represented by a number that is below JavaScript's 2^53 maximum for integers.
 
-#### secrets.hex2str( str, [bytesPerChar] )
+### secrets.hex2str( str, [bytesPerChar] )
 
 Convert a hexadecimal string into a UTF string. Each character of the output string is represented by `bytesPerChar` bytes in the String `str`. See note on `bytesPerChar` under `secrets.str2hex()` above.
 
@@ -256,21 +262,23 @@ Shamir's secret sharing scheme is "information-theoretically secure" and "perfec
 
 When `secrets.share()` is called with a `padLength`, the `secret` is zero-padded so that it's length is a multiple of the padLength. The second example above can be modified to use 1024-bit zero-padding, producing longer shares:
 
-    var pw = '<<PassWord123>>';
+```javascript
+var pw = "<<PassWord123>>"
 
-    // convert the text into a hex string
-    var pwHex = secrets.str2hex(pw); // => 240-bit password
+// convert the text into a hex string
+var pwHex = secrets.str2hex(pw) // => 240-bit password
 
-    // split into 5 shares, with a threshold of 3, WITH zero-padding
-    var shares = secrets.share(pwHex, 5, 3, 1024); // => 1024-bit padded shares
+// split into 5 shares, with a threshold of 3, WITH zero-padding
+var shares = secrets.share(pwHex, 5, 3, 1024) // => 1024-bit padded shares
 
-    // combine 3 shares
-    var comb = secrets.combine( [ shares[1], shares[3], shares[4] ] );
+// combine 3 shares
+var comb = secrets.combine([shares[1], shares[3], shares[4]])
 
-    // convert back to UTF string
-    comb = secrets.hex2str(comb);
+// convert back to UTF string
+comb = secrets.hex2str(comb)
 
-    console.log( comb === pw  ); // => true
+console.log(comb === pw) // => true
+```
 
 ## License
 
@@ -278,84 +286,92 @@ secrets.js is released under the MIT License. See the `LICENSE` file.
 
 ## Development and Testing
 
-Install [Node.js](http://nodejs.org/) first using an [Installer](http://nodejs.org/download/) or a [package manager for your OS](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager).
-
-Install all development dependencies locally:
-
-    // GLOBAL
-    npm install -g bower
-    npm install -g grunt-cli
-    npm install -g uglify-js
-    npm install -g jasmine-node@2.0.0
-
-    // LOCAL
-    cd secrets.js/
-    npm install
-    bower install
+```bash
+cd secrets.js/
+npm install
+```
 
 ### Continuous Development
 
-You can run 'grunt watch' to start watching all JavaScript files and run the testing and minification Grunt tasks on every save to a file.
+Watch all JavaScript files and run the testing and minification tasks on every save to a file.
 
-### Minifying
+```bash
+npm run watch
+```
 
-The minified version of the `secrets.js` can be found in `secrets.min.js`. This file was generated using the [UglifyJS2](https://github.com/mishoo/UglifyJS2) tool and was run with `grunt`:
+### Build & Minify
 
-    grunt uglify
+The minified version of the `secrets.js` can be found in `secrets.min.js`. This file was generated using the [UglifyJS2](https://github.com/mishoo/UglifyJS2) tool.
 
-### Browser Testing with Jasmine
-
-There is a [Jasmine](https://jasmine.github.io/) test suite that exercises the entire `secrets` module that can be run
-by simply opening the `SpecRunner.html` file in your browser. You can run the specs against the minified version of secrets.js by opening `SpecRunnerMinified.html`.
-
-    (On OS X)
-    open SpecRunner.html
-    open SpecRunnerMinified.html
+```bash
+npm run build
+```
 
 ### Node.js Testing with Jasmine
 
-You can also run the Jasmine test suite within a Node.js instance (assumes proper install of jasmine-node as shown above).
+You can also run the Jasmine test suite within a Node.js instance.
 
-    grunt jasmine_nodejs
+```bash
+npm run test
+```
 
-OR
+### Browser Testing with Jasmine
 
-    jasmine-node spec/
+There is a [Jasmine](https://jasmine.github.io/) test suite that exercises the entire `secrets` module that can be run against the source code or the minified version.
+
+```bash
+npm run test-browser
+npm run test-browser-min
+```
 
 ## Changelog
 
-- 1.2.0 \* Added `secrets.seedRNG()` function to allow seeding the SJCL RNG instantly via Browser or Node.js RNG's or with entropy from an external server.
+- 1.2.1 (WIP)
+
+  - Modernize build and test process
+  - Lint and Prettier JS and Markdown files
+  - Implement `npm run ...` scripts for common tests and build tasks
+  - Remove global dev dependencies
+  - Remove references to, and use of, Bower installation
+
+- 1.2.0
+
+  - Added `secrets.seedRNG()` function to allow seeding the SJCL RNG instantly via Browser or Node.js RNG's or with entropy from an external server.
 
 - 1.1.0
-  _ Added `grunt watch` task to auto-run tests and minification on every JavaScript file save.
-  _ Minified file now contains name, version and author comments automatically.
-  _ Configured basic `grunt` tasks for minification, Node.js testing with Jasmine, jshint, eslint. Removed Karma test runner and manual minification and testing steps. Just run `grunt`.
-  _ [Bugfix] calling `secrets.init()` now actually resets _all_ internal state back to the default settings. Previously `init()` only reset some internal values. `init()` now calls a new private function `reset()` to accomplish this.
-  _ [Enhancement] If the [Stanford Javascript Crypto Libarary (SJCL)](https://bitwiseshiftleft.github.io/sjcl/) is loaded in the browser it can be used as a fallback, or explicitly selected, CSPRNG for those browsers that don't support `crypto.getRandomValues()`. It uses the Fortuna RNG and collects additional entropy from mouse movements continually. The downside is that it requires mouse movements initially before `secrets.random()` can be called. `secrets.random()` will throw an Error if called when SJCL is not fully seeded. Currently set to use the maximum SJCL 'paranoia' level of 10. An enhancement to this might be to call out to retrieve one or more external sources of entropy (and mixing them together) to pre-seed the RNG when the library is loaded.
-  _ [Enhancement] You can now pass a string to `init()` or `setRNG()` which forces loading of a specific RNG (whether it will work or not in your current env!) \* Re-factored how `getRNG()` works internally. Now it returns small focused functions, not a giant function with detection conditionals. If SJCL is loaded the RNG tests are skipped since they would always initially fail due to the entropy pool being initally empty. This should be OK for this 'trusted' RNG.
 
-* 1.0.0
-  _ Packaging cleanup and ready for 1.0.0 release on Bower and NPM.
-  _ [Enhancement] Now supports the Javascript Universal Module Definition [UMDJS](https://github.com/umdjs/umd) for loading this module in the Browser with a `secrets` global, using an AMD Module loader like require.js, or in Node.js apps.
-  _ Refactor getRNG() to no longer have embedded `require` now that crypto is included on module load with the UMDJS change.
-  _ Updated README.md with info about this fork of secrets.js. \* Added some simple examples of usage to the examples folder.
+  - Added `grunt watch` task to auto-run tests and minification on every JavaScript file save.
+  - Minified file now contains name, version and author comments automatically.
+  - Configured basic `grunt` tasks for minification, Node.js testing with Jasmine, jshint, eslint. Removed Karma test runner and manual minification and testing steps. Just run `grunt`.
+  - [Bugfix] calling `secrets.init()` now actually resets _all_ internal state back to the default settings. Previously `init()` only reset some internal values. `init()` now calls a new private function `reset()` to accomplish this.
+  - [Enhancement] If the [Stanford Javascript Crypto Libarary (SJCL)](https://bitwiseshiftleft.github.io/sjcl/) is loaded in the browser it can be used as a fallback, or explicitly selected, CSPRNG for those browsers that don't support `crypto.getRandomValues()`. It uses the Fortuna RNG and collects additional entropy from mouse movements continually. The downside is that it requires mouse movements initially before `secrets.random()` can be called. `secrets.random()` will throw an Error if called when SJCL is not fully seeded. Currently set to use the maximum SJCL 'paranoia' level of 10. An enhancement to this might be to call out to retrieve one or more external sources of entropy (and mixing them together) to pre-seed the RNG when the library is loaded.
+  - [Enhancement] You can now pass a string to `init()` or `setRNG()` which forces loading of a specific RNG (whether it will work or not in your current env!) \* Re-factored how `getRNG()` works internally. Now it returns small focused functions, not a giant function with detection conditionals. If SJCL is loaded the RNG tests are skipped since they would always initially fail due to the entropy pool being initally empty. This should be OK for this 'trusted' RNG.
 
-* 0.2.0
-  _ [Enhancement] Extend the output of getConfig() to include the `radix` and `maxShares` properties.
-  _ [Security] Zero-pad all secrets in multiples of 128 bits (instead of 0) by default.
-  _ [Performance] Massive (100x) speed optimization to padLeft() private function (the second most frequently called block of code internally).
-  _ [Testing] Added a full jasmine test suite and Karma test runner. Karma runs will also generate code coverage HTML reports. Code coverage is currently >90%.
-  _ [Testing] Expose all private functions as Underscore (\_) prefixed functions to allow direct unit testing.
-  _ [Security] Removed Math.random fallback random number generator. Should always fail safe, even if it means not working. `secrets.getConfig().unsafePRNG` will always result in undefined now as it is no longer ever set.
-  _ Refactored away need to know anything about `global` var.
-  _ [Testing] jslint.com, jshint.com, and eslint CLI warnings for code and style now clean. \* Beautify code.
-* 0.1.8: bugfix release
-* 0.1.7: added config.unsafePRNG reset when supplying a new PRNG
-* 0.1.6:
-  _ Removed JSBN dependency, support for arbitrary radices, and the `convertBase()` function, with attendant 50% file size reduction.
-  _ Fixed bug where leading zeros were dropped. \* Renamed string conversion functions.
-* 0.1.5: getConfig() returns information about PRNG
-* 0.1.4: new share format
+- 1.0.0
+
+  - Packaging cleanup and ready for 1.0.0 release on Bower and NPM.
+  - [Enhancement] Now supports the Javascript Universal Module Definition [UMDJS](https://github.com/umdjs/umd) for loading this module in the Browser with a `secrets` global, using an AMD Module loader like require.js, or in Node.js apps.
+  - Refactor getRNG() to no longer have embedded `require` now that crypto is included on module load with the UMDJS change.
+  - Updated README.md with info about this fork of secrets.js. \* Added some simple examples of usage to the examples folder.
+
+- 0.2.0
+
+  - [Enhancement] Extend the output of getConfig() to include the `radix` and `maxShares` properties.
+  - [Security] Zero-pad all secrets in multiples of 128 bits (instead of 0) by default.
+  - [Performance] Massive (100x) speed optimization to padLeft() private function (the second most frequently called block of code internally).
+  - [Testing] Added a full jasmine test suite and Karma test runner. Karma runs will also generate code coverage HTML reports. Code coverage is currently >90%.
+  - [Testing] Expose all private functions as Underscore (\_) prefixed functions to allow direct unit testing.
+  - [Security] Removed Math.random fallback random number generator. Should always fail safe, even if it means not working. `secrets.getConfig().unsafePRNG` will always result in undefined now as it is no longer ever set.
+  - Refactored away need to know anything about `global` var.
+  - [Testing] jslint.com, jshint.com, and eslint CLI warnings for code and style now clean. - Beautify code.
+
+- 0.1.8: bugfix release
+- 0.1.7: added config.unsafePRNG reset when supplying a new PRNG
+- 0.1.6:
+  - Removed JSBN dependency, support for arbitrary radices, and the `convertBase()` function, with attendant 50% file size reduction.
+  - Fixed bug where leading zeros were dropped. \* Renamed string conversion functions.
+- 0.1.5: getConfig() returns information about PRNG
+- 0.1.4: new share format
 
 ## Possible future enhancements
 
