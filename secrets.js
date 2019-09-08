@@ -1147,17 +1147,19 @@
         // Generate a new share with id `id` (a number between 1 and 2^bits-1)
         // `id` can be a Number or a String in the default radix (16)
         newShare: function(id, shares) {
-            var share
+            var share, radid
 
             if (id && typeof id === "string") {
                 id = parseInt(id, config.radix)
             }
 
-            if (id && shares && shares[0]) {
+            radid = id.toString(config.radix)
+
+            if (id && radid && shares && shares[0]) {
                 share = this.extractShareComponents(shares[0])
                 return constructPublicShareString(
                     share.bits,
-                    id,
+                    radid,
                     this.combine(shares, id)
                 )
             }
