@@ -1122,7 +1122,7 @@
                 )
             }
 
-            secret = "1" + hex2bin(secret) // append a 1 as a marker so that we can preserve the correct number of leading zeros in our secret
+            secret = "1" + hex2bin(secret) // prepend a 1 as a marker so that we can preserve the correct number of leading zeros in our secret
             secret = splitNumStringToIntArray(secret, padLength)
 
             for (i = 0, len = secret.length; i < len; i++) {
