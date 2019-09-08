@@ -316,7 +316,7 @@ npm run test-browser-min
 
 ## Changelog
 
-- 2.0.0 (WIP)
+- 2.0.0
 
   - [BREAKING] Removed SJCL random number generator. Modern browsers have all the support they need for `crypto.getRandomValues()`.
   - Modernize build and test process
