@@ -138,7 +138,6 @@ You can also use it in the browser with an AMD module loading tool like [require
 - secrets.getConfig()
 - secrets.extractShareComponents()
 - secrets.setRNG()
-- secrets.seedRNG()
 - secrets.random()
 - secrets.str2hex()
 - secrets.hex2str()
