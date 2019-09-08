@@ -3,10 +3,10 @@
 // @license MIT
 
 /*jslint passfail: false, bitwise: true, nomen: true, plusplus: true, todo: false, maxerr: 1000 */
-/*global define, require, module, exports, window, Uint32Array, sjcl */
+/*global define, require, module, exports, window, Uint32Array */
 
 // eslint : http://eslint.org/docs/configuring/
-/*eslint-env node, browser, jasmine, sjcl */
+/*eslint-env node, browser, jasmine */
 /*eslint no-underscore-dangle:0 */
 
 // UMD (Universal Module Definition)
@@ -38,12 +38,7 @@
 })(this, function(crypto) {
     "use strict"
 
-    var defaults,
-        config,
-        preGenPadding,
-        runCSPRNGTest,
-        sjclParanoia,
-        CSPRNGTypes
+    var defaults, config, preGenPadding, runCSPRNGTest, CSPRNGTypes
 
     function reset() {
         defaults = {
@@ -94,13 +89,11 @@
         config = {}
         preGenPadding = new Array(1024).join("0") // Pre-generate a string of 1024 0's for use by padLeft().
         runCSPRNGTest = true
-        sjclParanoia = 10
 
         // WARNING : Never use 'testRandom' except for testing.
         CSPRNGTypes = [
             "nodeCryptoRandomBytes",
             "browserCryptoGetRandomValues",
-            "browserSJCLRandom",
             "testRandom"
         ]
     }
@@ -205,22 +198,12 @@
         return false
     }
 
-    // Stanford Javascript Crypto Library Support
-    function hasSJCL() {
-        if (typeof sjcl === "object" && typeof sjcl.random === "object") {
-            return true
-        }
-
-        return false
-    }
-
     // Returns a pseudo-random number generator of the form function(bits){}
     // which should output a random string of 1's and 0's of length `bits`.
     // `type` (Optional) : A string representing the CSPRNG that you want to
     // force to be loaded, overriding feature detection. Can be one of:
     //    "nodeCryptoRandomBytes"
     //    "browserCryptoGetRandomValues"
-    //    "browserSJCLRandom"
     //
     function getRNG(type) {
         function construct(bits, arr, radix, size) {
@@ -299,35 +282,6 @@
             return str
         }
 
-        // Browser SJCL : If the Stanford Javascript Crypto Library (SJCL) is loaded in the browser
-        // then use it as a fallback CSPRNG when crypto.getRandomValues() is not available.
-        // It may require some time and mouse movements to be fully seeded. Uses a modified version
-        // of the Fortuna RNG.
-        // See : https://bitwiseshiftleft.github.io/sjcl/
-        function browserSJCLRandom(bits) {
-            var elems,
-                radix,
-                size,
-                str = null
-
-            radix = 10
-            size = 32
-            elems = Math.ceil(bits / 32)
-
-            if (sjcl.random.isReady(sjclParanoia)) {
-                str = construct(
-                    bits,
-                    sjcl.random.randomWords(elems, sjclParanoia),
-                    radix,
-                    size
-                )
-            } else {
-                throw new Error("SJCL isn't finished seeding the RNG yet.")
-            }
-
-            return str
-        }
-
         // /////////////////////////////////////////////////////////////
         // WARNING : DO NOT USE. For testing purposes only.
         // /////////////////////////////////////////////////////////////
@@ -360,9 +314,8 @@
             return str
         }
 
-        // Return a random generator function for browsers that support HTML5
-        // crypto.getRandomValues(), Node.js compiled with OpenSSL support.
-        // or the Stanford Javascript Crypto Library Fortuna RNG.
+        // Return a random generator function for browsers that support
+        // crypto.getRandomValues() or Node.js compiled with OpenSSL support.
         // WARNING : NEVER use testRandom outside of a testing context. Totally non-random!
         if (type && type === "testRandom") {
             config.typeCSPRNG = type
@@ -373,20 +326,12 @@
         } else if (type && type === "browserCryptoGetRandomValues") {
             config.typeCSPRNG = type
             return browserCryptoGetRandomValues
-        } else if (type && type === "browserSJCLRandom") {
-            runCSPRNGTest = false
-            config.typeCSPRNG = type
-            return browserSJCLRandom
         } else if (hasCryptoRandomBytes()) {
             config.typeCSPRNG = "nodeCryptoRandomBytes"
             return nodeCryptoRandomBytes
         } else if (hasCryptoGetRandomValues()) {
             config.typeCSPRNG = "browserCryptoGetRandomValues"
             return browserCryptoGetRandomValues
-        } else if (hasSJCL()) {
-            runCSPRNGTest = false
-            config.typeCSPRNG = "browserSJCLRandom"
-            return browserSJCLRandom
         }
     }
 
@@ -583,23 +528,6 @@
                 this.setRNG()
             }
 
-            // Setup SJCL and start collecting entropy from mouse movements
-            if (hasSJCL() && config.typeCSPRNG === "browserSJCLRandom") {
-                /*eslint-disable new-cap */
-                sjcl.random = new sjcl.prng(sjclParanoia)
-                /*eslint-enable new-cap */
-
-                // In a Browser
-                if (hasCryptoGetRandomValues()) {
-                    // Collects entropy from browser mouse movement
-                    // which obviously won't work in Node.js.
-                    sjcl.random.startCollectors()
-                }
-
-                // see SJCL with browser or Node.js RNG if available.
-                this.seedRNG()
-            }
-
             if (
                 !isSetRNG() ||
                 !config.bits ||
@@ -611,59 +539,6 @@
                 config.exps.length !== config.size
             ) {
                 throw new Error("Initialization failed.")
-            }
-        },
-
-        // Pass in additional secure entropy, and an estimate of the bits of entropy
-        // provided, and a source name, and it will be used to seed the SJCL PRNG. This is
-        // useful since SJCL may take a while to be seeded since it depends on mouse
-        // movement and this can kickstart the generator almost immediately. SJCL will
-        // also continue to collect entropy from mouse movements after seeding.
-        //
-        // e.g. from random data sources like:
-        // https://api.random.org/json-rpc/1/
-        // https://entropy.ubuntu.com/?challenge=123
-        // https://qrng.anu.edu.au/API/api-demo.php
-        //
-        // See `examples/example_js_global.html` for sample usage with an
-        // external source of entropy.
-        seedRNG: function(data, estimatedEntropy, source) {
-            var bytes, rand
-
-            estimatedEntropy = parseInt(estimatedEntropy, 10)
-            source = source || "seedRNG"
-
-            // Seed with browser RNG
-            if (hasSJCL() && hasCryptoGetRandomValues()) {
-                bytes = new Uint32Array(256)
-                rand = crypto.getRandomValues(bytes)
-                //console.log(rand);
-                sjcl.random.addEntropy(rand, 2048, "cryptoGetRandomValues")
-            }
-
-            // See with Node.js RNG (Async)
-            if (hasSJCL() && hasCryptoRandomBytes()) {
-                crypto.randomBytes(256, function(ex, buf) {
-                    if (ex) {
-                        throw ex
-                    }
-                    //console.log("Have %d bytes of random data containing %s", buf.length, buf.toString('hex'));
-                    sjcl.random.addEntropy(
-                        buf.toString("hex"),
-                        2048,
-                        "cryptoRandomBytes"
-                    )
-                })
-            }
-
-            if (
-                hasSJCL() &&
-                data &&
-                estimatedEntropy &&
-                source &&
-                config.typeCSPRNG === "browserSJCLRandom"
-            ) {
-                sjcl.random.addEntropy(data, estimatedEntropy, source)
             }
         },
 
@@ -1016,15 +891,6 @@
                 )
             }
 
-            if (
-                config.typeCSPRNG === "browserSJCLRandom" &&
-                sjcl.random.isReady(sjclParanoia) < 1
-            ) {
-                throw new Error(
-                    "SJCL isn't finished seeding the RNG yet. Needs new entropy added or more mouse movement."
-                )
-            }
-
             return bin2hex(config.rng(bits))
         },
 
@@ -1177,7 +1043,6 @@
         _bin2hex: bin2hex,
         _hasCryptoGetRandomValues: hasCryptoGetRandomValues,
         _hasCryptoRandomBytes: hasCryptoRandomBytes,
-        _hasSJCL: hasSJCL,
         _getRNG: getRNG,
         _isSetRNG: isSetRNG,
         _splitNumStringToIntArray: splitNumStringToIntArray,

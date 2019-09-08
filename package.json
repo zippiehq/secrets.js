@@ -15,8 +15,6 @@
         "grunt-jasmine-nodejs": "^1.6",
         "jasmine": "^3.4.0",
         "jquery": "^3.4",
-        "randomorg-js": "^1.0.0",
-        "sjcl": "^1.0.2",
         "uglify-js": "^3.6.0"
     },
     "scripts": {

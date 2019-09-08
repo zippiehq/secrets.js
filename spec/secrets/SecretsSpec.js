@@ -126,9 +126,6 @@ describe("Secrets", function() {
         })
 
         it("when its a string that is a valid RNG type", function() {
-            secrets.setRNG("browserSJCLRandom")
-            expect(secrets.getConfig().typeCSPRNG).toEqual("browserSJCLRandom")
-
             // modify the test for node vs. browser env.
             if (
                 typeof crypto === "object" &&

@@ -178,7 +178,7 @@ The output of `secrets.newShare()` is a String. This is the same format for the 
 Set the number of bits to use for finite field arithmetic.
 
 - `bits`: Number, optional, default `8`: An integer between 3 and 20. The number of bits to use for the Galois field.
-- `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues", "browserSJCLRandom"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. This is probably most useful for testing or for choosing the `browserSJCLRandom` generator which is a good fallback for browsers that don't support crypto.getRandomValues(). Warning: You can specify a RNG that won't actually _work_ in your environment.
+- `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. Warning: You can specify a RNG that won't actually _work_ in your environment.
 
 Internally, secrets.js uses finite field arithmetic in binary Galois Fields of size 2^bits. Multiplication is implemented by the means of log and exponential tables. Before any arithmetic is performed, the log and exp tables are pre-computed. Each table contains 2^bits entries.
 
@@ -191,7 +191,6 @@ Note:
 - The size of the exp and log tables depends on `bits` (each has 2^bits entries). Therefore, using a large number of bits will cause a slightly longer delay to compute the tables.
 - The _theoretical_ maximum number of bits is 31, as JavaScript performs bitwise operations on 31-bit numbers. A limit of 20 bits has been hard-coded into secrets.js, which can produce 1,048,575 shares. secrets.js has not been tested with this many shares, and it is not advisable to go this high, as it may be too slow to be of any practical use.
 - The Galois Field may be re-initialized to a new setting when `secrets.newShare()` or `secrets.combine()` are called with shares that are from a different Galois Field than the currently initialized one. For this reason, use `secrets.getConfig()` to check what the current `bits` setting is.
-- Calling `secrets.init()` will also attempt to seed the SJCL RNG if appropriate.
 
 ### secrets.getConfig()
 
@@ -201,7 +200,7 @@ Returns an Object with the current configuration. Has the following properties:
 - `radix`: [Number] The current radix (Default: 16)
 - `maxShares`: [Number] The max shares that can be created with the current `bits`. Computed as `Math.pow(2, config.bits) - 1`
 - `hasCSPRNG`: [Boolean] Indicates whether or not a Cryptographically Secure Pseudo Random Number Generator has been found and initialized.
-- - `typeCSPRNG`: [String] Indicates which random number generator function has been selected based on either environment feature detection (the default) or by manually specifying the RNG type using `secrets.init()` or `secrets.setRNG()`. The current possible types that can be displayed here are ["nodeCryptoRandomBytes", "browserCryptoGetRandomValues", "browserSJCLRandom"].
+- - `typeCSPRNG`: [String] Indicates which random number generator function has been selected based on either environment feature detection (the default) or by manually specifying the RNG type using `secrets.init()` or `secrets.setRNG()`. The current possible types that can be displayed here are ["nodeCryptoRandomBytes", "browserCryptoGetRandomValues"].
 
 ### secrets.extractShareComponents( share )
 
@@ -215,21 +214,11 @@ Returns an Object with the extracted parts of a public share string passed as an
 
 Set the pseudo-random number generator used to compute shares.
 
-secrets.js uses a PRNG in the `secrets.share()` and `secrets.random()` functions. By default, it tries to use a cryptographically strong PRNG. In Node.js this is `crypto.randomBytes()`. In browsers that support it, it is `crypto.getRandomValues()` (using typed arrays, which must be supported too). If neither of these are available, and if the `sjcl` library has been loaded it will be used. If it is not loaded an Error will be thrown.
+secrets.js uses a PRNG in the `secrets.share()` and `secrets.random()` functions. By default, it tries to use a cryptographically strong PRNG. In Node.js this is `crypto.randomBytes()`. In browsers that support it, it is `crypto.getRandomValues()` (using typed arrays, which must be supported too).
 
 To supply your own PRNG, use `secrets.setRNG()`. It expects a Function of the form `function(bits){}`. It should compute a random integer between 1 and 2^bits-1. The output must be a String of length `bits` containing random 1's and 0's (cannot be ALL 0's). When `secrets.setRNG()` is called, it tries to check the PRNG to make sure it complies with some of these demands, but obviously it's not possible to run through all possible outputs. So make sure that it works correctly.
 
-- `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues", "browserSJCLRandom"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. This is probably most useful for testing or for choosing the `browserSJCLRandom` generator which is a good fallback for browsers that don't support crypto.getRandomValues(). Warning: You can specify a RNG that won't actually _work_ in your environment.
-
-### secrets.seedRNG ([data, estimatedEntropy, source])
-
-If the SJCL crypto library is loaded in the current environment and enabled with `secrets.init()` or `secrets.setRNG()` then calling this function will attempt to immediately seed the SJCL RNG with entropy. If no arguments are provided the function will attempt to get secure entropy from `crypto.getRandomValues()` in a Browser, or `crypto.randomBytes()` in a Node.js environment.
-
-You can also call this function with arguments that provide and describe an external source of secure entropy (e.g. random.org API results). You can see an example of this form of usage in the file `examples/example_js_global.html` where Random data is pulled from Random.org and used to seed the RNG. You need to pass all three arguments if you want to go this route. See the [SJCL API documentation](https://bitwiseshiftleft.github.io/sjcl/doc/symbols/sjcl.prng.html) for more info.
-
-- `data`: Array or String: optional: The entropic value. Should be a 32-bit integer, array of 32-bit integers, or string.
-- `estimatedEntropy`: Integer: optional: An Integer that represents a conservative estimate of how many bits of entropy the data you are providing provides to the RNG.
-- `source`: String, optional: A string that describes the source of the entropy.
+- `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. Warning: You can specify a RNG that won't actually _work_ in your environment.
 
 ### secrets.random( bits )
 
@@ -328,8 +317,9 @@ npm run test-browser-min
 
 ## Changelog
 
-- 1.2.1 (WIP)
+- 2.0.0 (WIP)
 
+  - [BREAKING] Removed SJCL random number generator. Modern browsers have all the support they need for `crypto.getRandomValues()`.
   - Modernize build and test process
   - Lint and Prettier JS and Markdown files
   - Implement `npm run ...` scripts for common tests and build tasks

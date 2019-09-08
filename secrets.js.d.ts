@@ -15,7 +15,6 @@ interface ShareComponents {
 type RNGType =
   | "nodeCryptoRandomBytes"
   | "browserCryptoGetRandomValues"
-  | "browserSJCLRandom"
   | "testRandom"
 
 type Shares = Array<string>
@@ -112,7 +111,6 @@ export function _bin2hex(str: string): string
  * force to be loaded, overriding feature detection. Can be one of:
  *    "nodeCryptoRandomBytes"
  *    "browserCryptoGetRandomValues"
- *    "browserSJCLRandom"
  */
 export function _getRNG(type?: RNGType): RNGFunction
 
