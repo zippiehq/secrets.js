@@ -280,6 +280,8 @@ comb = secrets.hex2str(comb)
 console.log(comb === pw) // => true
 ```
 
+There is a [workbook containing some additional padding examples](https://github.com/grempe/secrets.js/blob/master/examples/padding.js).
+
 ## License
 
 secrets.js is released under the MIT License. See the `LICENSE` file.
