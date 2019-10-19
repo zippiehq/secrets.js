@@ -38,7 +38,7 @@
 })(this, function(crypto) {
     "use strict"
 
-    var defaults, config, preGenPadding, CSPRNGTypes
+    var defaults, config, preGenPadding
 
     function reset() {
         defaults = {
@@ -88,13 +88,6 @@
         }
         config = {}
         preGenPadding = new Array(1024).join("0") // Pre-generate a string of 1024 0's for use by padLeft().
-
-        // WARNING : Never use 'testRandom' except for testing.
-        CSPRNGTypes = [
-            "nodeCryptoRandomBytes",
-            "browserCryptoGetRandomValues",
-            "testRandom"
-        ]
     }
 
     // Pads a string `str` with zeros on the left so that its length is a multiple of `bits`
@@ -140,6 +133,7 @@
 
             bin = padLeft(num.toString(2), 4) + bin
         }
+
         return bin
     }
 
@@ -305,12 +299,18 @@
             return str
         }
 
-        // Return a random generator function for browser or Node.js
+        // Unsafe testing RNG
         if (type && type === "testRandom") {
             return testRandom
-        } else if (hasCryptoRandomBytes()) {
+        }
+
+        // Node.js RNG
+        if (hasCryptoRandomBytes()) {
             return nodeCryptoRandomBytes
-        } else if (hasCryptoGetRandomValues()) {
+        }
+
+        // Browser RNG
+        if (hasCryptoGetRandomValues()) {
             return browserCryptoGetRandomValues
         }
     }
@@ -782,6 +782,7 @@
             return out
         },
 
+        // FIXME : REMOVE ME?
         // Generates a random bits-length number string using the PRNG
         random: function(bits) {
             if (
