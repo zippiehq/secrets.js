@@ -460,7 +460,7 @@
     // //////////////////
 
     var secrets = {
-        init: function(bits, rngType) {
+        init: function(bits) {
             var logs = [],
                 exps = [],
                 x = 1,
@@ -486,10 +486,6 @@
                 )
             }
 
-            if (rngType && CSPRNGTypes.indexOf(rngType) === -1) {
-                throw new Error("Invalid RNG type argument : '" + rngType + "'")
-            }
-
             config.radix = defaults.radix
             config.bits = bits || defaults.bits
             config.size = Math.pow(2, config.bits)
@@ -511,11 +507,7 @@
             config.logs = logs
             config.exps = exps
 
-            if (rngType) {
-                this.setRNG(rngType)
-            } else {
-                this.setRNG()
-            }
+            this.setRNG()
 
             if (
                 !config.bits ||

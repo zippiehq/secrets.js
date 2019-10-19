@@ -112,7 +112,8 @@ describe("Secrets", function() {
                 maxShares: 65535,
                 typeCSPRNG: "testRandom"
             }
-            secrets.init(16, "testRandom")
+            secrets.init(16)
+            secrets.setRNG("testRandom")
             expect(secrets.getConfig()).toEqual(expectedConfig)
         })
     })

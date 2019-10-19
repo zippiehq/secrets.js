@@ -172,12 +172,11 @@ Create a new share from the input shares.
 
 The output of `secrets.newShare()` is a String. This is the same format for the share that `secrets.share()` outputs. Note that this function ALWAYS produces an output String. However, as for `secrets.combine()`, if the number of `shares` that are entered is not the `threshold` number of shares, the output share _will not_ be a valid share (i.e. _will not_ be useful in reconstructing the original secret). In order to guarantee that the share is valid, the correct `threshold` number of shares must be provided.
 
-### secrets.init( [bits, rngType] )
+### secrets.init( bits )
 
 Set the number of bits to use for finite field arithmetic.
 
 - `bits`: Number, optional, default `8`: An integer between 3 and 20. The number of bits to use for the Galois field.
-- `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. Warning: You can specify a RNG that won't actually _work_ in your environment.
 
 Internally, secrets.js uses finite field arithmetic in binary Galois Fields of size 2^bits. Multiplication is implemented by the means of log and exponential tables. Before any arithmetic is performed, the log and exp tables are pre-computed. Each table contains 2^bits entries.
 

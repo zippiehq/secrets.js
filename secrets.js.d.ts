@@ -28,7 +28,7 @@ type RNGFunction = (bits: number) => string
 /**
  * Initialize secrets with default settings.
  */
-export function init(bits: number, rngType: string): void
+export function init(bits: number): void
 
 /**
  * Get the current config.
