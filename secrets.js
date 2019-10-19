@@ -38,7 +38,7 @@
 })(this, function(crypto) {
     "use strict"
 
-    var defaults, config, preGenPadding, runCSPRNGTest, CSPRNGTypes
+    var defaults, config, preGenPadding, CSPRNGTypes
 
     function reset() {
         defaults = {
@@ -88,7 +88,6 @@
         }
         config = {}
         preGenPadding = new Array(1024).join("0") // Pre-generate a string of 1024 0's for use by padLeft().
-        runCSPRNGTest = true
 
         // WARNING : Never use 'testRandom' except for testing.
         CSPRNGTypes = [
@@ -735,42 +734,6 @@
             // set the RNG to the type specified.
             if (rng && typeof rng === "string") {
                 rng = getRNG(rng)
-            }
-
-            if (runCSPRNGTest) {
-                if (rng && typeof rng !== "function") {
-                    throw new Error(errPrefix + "(Not a function)." + errSuffix)
-                }
-
-                if (rng && typeof rng(config.bits) !== "string") {
-                    throw new Error(
-                        errPrefix + "(Output is not a string)." + errSuffix
-                    )
-                }
-
-                if (rng && !parseInt(rng(config.bits), 2)) {
-                    throw new Error(
-                        errPrefix +
-                            "(Binary string output not parseable to an Integer)." +
-                            errSuffix
-                    )
-                }
-
-                if (rng && rng(config.bits).length > config.bits) {
-                    throw new Error(
-                        errPrefix +
-                            "(Output length is greater than config.bits)." +
-                            errSuffix
-                    )
-                }
-
-                if (rng && rng(config.bits).length < config.bits) {
-                    throw new Error(
-                        errPrefix +
-                            "(Output length is less than config.bits)." +
-                            errSuffix
-                    )
-                }
             }
 
             config.rng = rng
