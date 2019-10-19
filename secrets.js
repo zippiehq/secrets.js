@@ -305,23 +305,12 @@
             return str
         }
 
-        // Return a random generator function for browsers that support
-        // crypto.getRandomValues() or Node.js compiled with OpenSSL support.
-        // WARNING : NEVER use testRandom outside of a testing context. Totally non-random!
+        // Return a random generator function for browser or Node.js
         if (type && type === "testRandom") {
-            config.typeCSPRNG = type
             return testRandom
-        } else if (type && type === "nodeCryptoRandomBytes") {
-            config.typeCSPRNG = type
-            return nodeCryptoRandomBytes
-        } else if (type && type === "browserCryptoGetRandomValues") {
-            config.typeCSPRNG = type
-            return browserCryptoGetRandomValues
         } else if (hasCryptoRandomBytes()) {
-            config.typeCSPRNG = "nodeCryptoRandomBytes"
             return nodeCryptoRandomBytes
         } else if (hasCryptoGetRandomValues()) {
-            config.typeCSPRNG = "browserCryptoGetRandomValues"
             return browserCryptoGetRandomValues
         }
     }
@@ -506,8 +495,7 @@
 
             config.logs = logs
             config.exps = exps
-
-            this.setRNG()
+            config.rng = getRNG()
 
             if (
                 !config.bits ||
@@ -622,7 +610,6 @@
             obj.radix = config.radix
             obj.bits = config.bits
             obj.maxShares = config.maxShares
-            obj.typeCSPRNG = config.typeCSPRNG
             return obj
         },
 
@@ -690,35 +677,9 @@
             throw new Error("The share data provided is invalid : " + share)
         },
 
-        // Set the PRNG to use. If no RNG function is supplied, pick a default using getRNG()
-        setRNG: function(rng) {
-            var errPrefix = "Random number generator is invalid ",
-                errSuffix =
-                    " Supply an CSPRNG of the form function(bits){} that returns a string containing 'bits' number of random 1's and 0's."
-
-            if (
-                rng &&
-                typeof rng === "string" &&
-                CSPRNGTypes.indexOf(rng) === -1
-            ) {
-                throw new Error("Invalid RNG type argument : '" + rng + "'")
-            }
-
-            // If RNG was not specified at all,
-            // try to pick one appropriate for this env.
-            if (!rng) {
-                rng = getRNG()
-            }
-
-            // If `rng` is a string, try to forcibly
-            // set the RNG to the type specified.
-            if (rng && typeof rng === "string") {
-                rng = getRNG(rng)
-            }
-
-            config.rng = rng
-
-            return true
+        // Use only for testing. As you can see, it is unsafe for anything else.
+        useUnsafeDeterministicTestRNG: function() {
+            config.rng = getRNG("testRandom")
         },
 
         // Converts a given UTF16 character string to the HEX representation.
@@ -986,7 +947,6 @@
         _bin2hex: bin2hex,
         _hasCryptoGetRandomValues: hasCryptoGetRandomValues,
         _hasCryptoRandomBytes: hasCryptoRandomBytes,
-        _getRNG: getRNG,
         _splitNumStringToIntArray: splitNumStringToIntArray,
         _horner: horner,
         _lagrange: lagrange,

@@ -137,7 +137,6 @@ You can also use it in the browser with an AMD module loading tool like [require
 - secrets.init()
 - secrets.getConfig()
 - secrets.extractShareComponents()
-- secrets.setRNG()
 - secrets.random()
 - secrets.str2hex()
 - secrets.hex2str()
@@ -197,7 +196,6 @@ Returns an Object with the current configuration. Has the following properties:
 - `bits`: [Number] The number of bits used for the current initialized finite field
 - `radix`: [Number] The current radix (Default: 16)
 - `maxShares`: [Number] The max shares that can be created with the current `bits`. Computed as `Math.pow(2, config.bits) - 1`
-- `typeCSPRNG`: [String] Indicates which random number generator function has been selected based on either environment feature detection (the default) or by manually specifying the RNG type using `secrets.init()` or `secrets.setRNG()`. The current possible types that can be displayed here are ["nodeCryptoRandomBytes", "browserCryptoGetRandomValues"].
 
 ### secrets.extractShareComponents( share )
 
@@ -206,16 +204,6 @@ Returns an Object with the extracted parts of a public share string passed as an
 - `bits`: [Number] The number of bits configured when the share was created.
 - `id`: [Number] The ID number associated with the share when created.
 - `data`: [String] A hex string of the actual share data.
-
-### secrets.setRNG( function(bits){} | rngType )
-
-Set the pseudo-random number generator used to compute shares.
-
-secrets.js uses a PRNG in the `secrets.share()` and `secrets.random()` functions. By default, it tries to use a cryptographically strong PRNG. In Node.js this is `crypto.randomBytes()`. In browsers that support it, it is `crypto.getRandomValues()` (using typed arrays, which must be supported too).
-
-To supply your own PRNG, use `secrets.setRNG()`. It expects a Function of the form `function(bits){}`. It should compute a random integer between 1 and 2^bits-1. The output must be a String of length `bits` containing random 1's and 0's (cannot be ALL 0's). When `secrets.setRNG()` is called, it tries to check the PRNG to make sure it complies with some of these demands, but obviously it's not possible to run through all possible outputs. So make sure that it works correctly.
-
-- `rngType`: String, optional: A string that has one of the values `["nodeCryptoRandomBytes", "browserCryptoGetRandomValues"]`. Setting this will try to override the RNG that would be selected normally based on feature detection. Warning: You can specify a RNG that won't actually _work_ in your environment.
 
 ### secrets.random( bits )
 
