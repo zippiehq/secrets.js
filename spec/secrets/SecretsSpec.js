@@ -99,7 +99,6 @@ describe("Secrets", function() {
                 radix: 16,
                 bits: 8,
                 maxShares: 255,
-                hasCSPRNG: true,
                 typeCSPRNG: "testRandom"
             }
             expect(secrets.getConfig()).toEqual(expectedConfig)
@@ -111,7 +110,6 @@ describe("Secrets", function() {
                 radix: 16,
                 bits: 16,
                 maxShares: 65535,
-                hasCSPRNG: true,
                 typeCSPRNG: "testRandom"
             }
             secrets.init(16, "testRandom")

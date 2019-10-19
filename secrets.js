@@ -641,7 +641,6 @@
             obj.radix = config.radix
             obj.bits = config.bits
             obj.maxShares = config.maxShares
-            obj.hasCSPRNG = isSetRNG()
             obj.typeCSPRNG = config.typeCSPRNG
             return obj
         },

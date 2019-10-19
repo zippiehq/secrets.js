@@ -2,7 +2,6 @@ interface SecretsConfig {
   radix: number
   bits: number
   maxShares: number
-  hasCSPRNG: boolean
   typeCSPRNG: string
 }
 
