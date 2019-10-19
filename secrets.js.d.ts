@@ -113,8 +113,6 @@ export function _bin2hex(str: string): string
  */
 export function _getRNG(type?: RNGType): RNGFunction
 
-export function _isSetRNG(): boolean
-
 /**
  * Splits a number string `bits`-length segments, after first
  * optionally zero-padding it to a length that is a multiple of `padLength.

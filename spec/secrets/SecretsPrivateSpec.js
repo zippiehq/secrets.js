@@ -80,8 +80,6 @@ describe("Secrets private function", function() {
 
     describe("getRNG()", function() {})
 
-    describe("isSetRNG()", function() {})
-
     describe("splitNumStringToIntArray()", function() {})
 
     describe("horner()", function() {})

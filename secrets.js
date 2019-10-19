@@ -97,14 +97,6 @@
         ]
     }
 
-    function isSetRNG() {
-        if (config && config.rng && typeof config.rng === "function") {
-            return true
-        }
-
-        return false
-    }
-
     // Pads a string `str` with zeros on the left so that its length is a multiple of `bits`
     function padLeft(str, multipleOfBits) {
         var missing
@@ -521,14 +513,11 @@
 
             if (rngType) {
                 this.setRNG(rngType)
-            }
-
-            if (!isSetRNG()) {
+            } else {
                 this.setRNG()
             }
 
             if (
-                !isSetRNG() ||
                 !config.bits ||
                 !config.size ||
                 !config.maxShares ||
@@ -1006,7 +995,6 @@
         _hasCryptoGetRandomValues: hasCryptoGetRandomValues,
         _hasCryptoRandomBytes: hasCryptoRandomBytes,
         _getRNG: getRNG,
-        _isSetRNG: isSetRNG,
         _splitNumStringToIntArray: splitNumStringToIntArray,
         _horner: horner,
         _lagrange: lagrange,
