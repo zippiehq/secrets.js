@@ -10,11 +10,6 @@ interface ShareComponents {
   data: string
 }
 
-type RNGType =
-  | "nodeCryptoRandomBytes"
-  | "browserCryptoGetRandomValues"
-  | "testRandom"
-
 type Shares = Array<string>
 
 interface Share {

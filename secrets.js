@@ -155,40 +155,9 @@
         return hex
     }
 
-    // Browser supports crypto.getRandomValues()
-    function hasCryptoGetRandomValues() {
-        if (
-            crypto &&
-            typeof crypto === "object" &&
-            (typeof crypto.getRandomValues === "function" ||
-                typeof crypto.getRandomValues === "object") &&
-            (typeof Uint32Array === "function" ||
-                typeof Uint32Array === "object")
-        ) {
-            return true
-        }
-
-        return false
-    }
-
-    // Node.js support for crypto.randomBytes()
-    function hasCryptoRandomBytes() {
-        if (
-            typeof crypto === "object" &&
-            typeof crypto.randomBytes === "function"
-        ) {
-            return true
-        }
-
-        return false
-    }
-
     // Returns a pseudo-random number generator of the form function(bits){}
     // which should output a random string of 1's and 0's of length `bits`.
-    // `type` (Optional) : A string representing the CSPRNG that you want to
-    // force to be loaded, overriding feature detection. Can be one of:
-    //    "nodeCryptoRandomBytes"
-    //    "browserCryptoGetRandomValues"
+    // `type` (Optional) : the "testRandom" string will override RNG detection.
     //
     function getRNG(type) {
         function construct(bits, arr, radix, size) {
@@ -218,12 +187,9 @@
             return str
         }
 
-        // Node.js : crypto.randomBytes()
-        // Note : Node.js and crypto.randomBytes() uses the OpenSSL RAND_bytes() function for its CSPRNG.
-        //        Node.js will need to have been compiled with OpenSSL for this to work.
-        // See : https://github.com/joyent/node/blob/d8baf8a2a4481940bfed0196308ae6189ca18eee/src/node_crypto.cc#L4696
-        // See : https://www.openssl.org/docs/crypto/rand.html
-        function nodeCryptoRandomBytes(bits) {
+        // Node.js
+        // See : https://nodejs.org/api/crypto.html#crypto_crypto_randombytes_size_callback
+        function nodeRandom(bits) {
             var buf,
                 bytes,
                 radix,
@@ -242,11 +208,11 @@
             return str
         }
 
-        // Browser : crypto.getRandomValues()
-        // See : https://dvcs.w3.org/hg/webcrypto-api/raw-file/tip/spec/Overview.html#dfn-Crypto
-        // See : https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues
+        // Browser
+        // See : https://w3c.github.io/webcrypto/#Crypto-method-getRandomValues
+        // See : https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
         // Supported Browsers : http://caniuse.com/#search=crypto.getRandomValues
-        function browserCryptoGetRandomValues(bits) {
+        function browserRandom(bits) {
             var elems,
                 radix,
                 size,
@@ -299,20 +265,33 @@
             return str
         }
 
-        // Unsafe testing RNG
+        // Test (UNSAFE!!) RNG
         if (type && type === "testRandom") {
             return testRandom
         }
 
-        // Node.js RNG
-        if (hasCryptoRandomBytes()) {
-            return nodeCryptoRandomBytes
+        // Detect Node.js RNG
+        if (
+            typeof crypto === "object" &&
+            typeof crypto.randomBytes === "function"
+        ) {
+            return nodeRandom
         }
 
-        // Browser RNG
-        if (hasCryptoGetRandomValues()) {
-            return browserCryptoGetRandomValues
+        // Detect Browser RNG
+        if (
+            crypto &&
+            typeof crypto === "object" &&
+            (typeof crypto.getRandomValues === "function" ||
+                typeof crypto.getRandomValues === "object") &&
+            (typeof Uint32Array === "function" ||
+                typeof Uint32Array === "object")
+        ) {
+            return browserRandom
         }
+
+        // No secure RNG detected. Bail out.
+        throw new Error("No source of cryptographically secure entropy found.")
     }
 
     // Splits a number string `bits`-length segments, after first
@@ -782,8 +761,7 @@
             return out
         },
 
-        // FIXME : REMOVE ME?
-        // Generates a random bits-length number string using the PRNG
+        // Generates a random bits-length hex string using the RNG
         random: function(bits) {
             if (
                 typeof bits !== "number" ||
@@ -946,8 +924,6 @@
         _padLeft: padLeft,
         _hex2bin: hex2bin,
         _bin2hex: bin2hex,
-        _hasCryptoGetRandomValues: hasCryptoGetRandomValues,
-        _hasCryptoRandomBytes: hasCryptoRandomBytes,
         _splitNumStringToIntArray: splitNumStringToIntArray,
         _horner: horner,
         _lagrange: lagrange,
