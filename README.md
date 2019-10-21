@@ -302,6 +302,13 @@ npm run test-browser-min
 
 ## Changelog
 
+- 3.0.0
+
+  - [BREAKING, SECURITY] Remove ability to specify RNG `type` in `.init()`
+  - [BREAKING, SECURITY] Remove `.setRNG()` public API. Appropriate browser and Node.js RNG auto-detected now.
+  - [BREAKING] Remove `config.typeCSPRNG` property from `.getConfig()`
+  - [BREAKING] Remove `config.hasCSPRNG` property from `.getConfig()`
+
 - 2.0.0
 
   - [BREAKING] Removed SJCL random number generator. Modern browsers have all the support they need for `crypto.getRandomValues()`.
