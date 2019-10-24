@@ -94,7 +94,7 @@ export function share(
  */
 export function newShare(id: number, shares: Shares): string
 
-export function _reset()
+export function _reset(): void
 
 /**
  * Pads a string `str` with zeros on the left so that its length is a multiple of `bits`
